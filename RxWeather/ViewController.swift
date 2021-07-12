@@ -45,9 +45,9 @@ class ViewController: UIViewController {
             .observe(on: MainScheduler.instance)
             .asDriver(onErrorJustReturn: WeatherResult.emptyResponse)
         searchDriver.map { "\($0.main.temp) ℃"}
-        .drive( self.tempLabel.rx.text).disposed(by: disposeBag)
+        .drive(self.tempLabel.rx.text).disposed(by: disposeBag)
         searchDriver.map { "\($0.main.humidity) 💧"}
-        .drive( self.humidityLabel.rx.text).disposed(by: disposeBag)
+        .drive(self.humidityLabel.rx.text).disposed(by: disposeBag)
     }
     private func clearText(){
         self.tempLabel.text = "- ℃"
