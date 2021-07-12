@@ -19,7 +19,10 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.prefersLargeTitles = true
-        self.searchTextField.rx.value.subscribe(onNext: { city in
+        self.searchTextField.returnKeyType = .search
+        self.searchTextField.rx.controlEvent([.editingDidEndOnExit])
+            .asObservable().map{self.searchTextField.text}
+            .subscribe(onNext: { city in
             guard let cityName = city else {
                 return
             }
@@ -29,7 +32,8 @@ class ViewController: UIViewController {
                 self.fetchWeather(cityName)
             }
             
-        }).disposed(by: disposeBag)
+        }
+            ).disposed(by: disposeBag)
     }
     
     private func fetchWeather(_ city: String){
