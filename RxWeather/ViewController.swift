@@ -19,6 +19,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.prefersLargeTitles = true
+        clearText()
         self.searchTextField.returnKeyType = .search
         self.searchTextField.rx.controlEvent([.editingDidEndOnExit])
             .asObservable().map{self.searchTextField.text}
@@ -27,13 +28,12 @@ class ViewController: UIViewController {
                 return
             }
             if cityName.isEmpty {
-                self.displayWeather(nil)
+                self.clearText()
             }else {
                 self.fetchWeather(cityName)
             }
             
-        }
-            ).disposed(by: disposeBag)
+        }).disposed(by: disposeBag)
     }
     
     private func fetchWeather(_ city: String){
@@ -41,24 +41,17 @@ class ViewController: UIViewController {
             return
         }
         let resource = Resource<WeatherResult>(url: url)
-        URLRequest.load(resource: resource)
+        let search = URLRequest.load(resource: resource)
             .observe(on: MainScheduler.instance)
             .catchAndReturn(WeatherResult.emptyResponse)
-            .subscribe(onNext: { result in
-            
-            let weather = result.main
-            self.displayWeather(weather)
-            
-        }).disposed(by: disposeBag)
+        search.map { "\($0.main.temp) ℃"}
+        .bind(to: self.tempLabel.rx.text).disposed(by: disposeBag)
+        search.map { "\($0.main.humidity) 💧"}
+        .bind(to: self.humidityLabel.rx.text).disposed(by: disposeBag)
     }
-    private func displayWeather(_ weather: Weather?){
-        if let weather = weather {
-            self.tempLabel.text = "\(weather.temp) ℃"
-            self.humidityLabel.text = "\(weather.humidity) 💧"
-        }else{
-            self.tempLabel.text = "- ℃"
-            self.humidityLabel.text = "- 💧"
-        }
+    private func clearText(){
+        self.tempLabel.text = "- ℃"
+        self.humidityLabel.text = "- 💧"
     }
 
 }
