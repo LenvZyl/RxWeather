@@ -43,6 +43,7 @@ class ViewController: UIViewController {
         let resource = Resource<WeatherResult>(url: url)
         let searchDriver = URLRequest.load(resource: resource)
             .observe(on: MainScheduler.instance)
+            .retry(2)
             .asDriver(onErrorJustReturn: WeatherResult.emptyResponse)
         searchDriver.map { "\($0.main.temp) ℃"}
         .drive(self.tempLabel.rx.text).disposed(by: disposeBag)
